@@ -75,6 +75,14 @@
 
 #endif
 
+#define LED_PIN1 2
+#define LED_PIN2 3
+#define LED_PIN3 4
+#define LED_PIN4 5
+#define LED_PIN5 6
+#define LED_PIN6 7
+#define LED_PIN7 8
+#define LED_PIN8 9
 
 #define LED_PIN1  2
 #define LED_PIN2  3
@@ -89,9 +97,9 @@
 uint16_t address = 0;
 
 #define NUM_LEDS stripLength
+#define NUM_BARS 8
 
-CRGB leds1[NUM_LEDS];
-CRGB leds2[NUM_LEDS];
+CRGB leds[NUM_BARS][NUM_LEDS];
 
 void updateAddress(){    
 
@@ -142,24 +150,35 @@ void setup() {
   FastLED.addLeds<CHIPSET, LED_PIN1, COLOR_ORDER>(leds1, NUM_LEDS);
   FastLED.addLeds<CHIPSET, LED_PIN2, COLOR_ORDER>(leds2, NUM_LEDS);
 
+  FastLED.addLeds<CHIPSET, LED_PIN1, COLOR_ORDER>(leds[0], NUM_LEDS);
+  FastLED.addLeds<CHIPSET, LED_PIN2, COLOR_ORDER>(leds[1], NUM_LEDS);
+  FastLED.addLeds<CHIPSET, LED_PIN3, COLOR_ORDER>(leds[2], NUM_LEDS);
+  FastLED.addLeds<CHIPSET, LED_PIN4, COLOR_ORDER>(leds[3], NUM_LEDS);
+  FastLED.addLeds<CHIPSET, LED_PIN5, COLOR_ORDER>(leds[4], NUM_LEDS);
+  FastLED.addLeds<CHIPSET, LED_PIN6, COLOR_ORDER>(leds[5], NUM_LEDS);
+  FastLED.addLeds<CHIPSET, LED_PIN7, COLOR_ORDER>(leds[6], NUM_LEDS);
+  FastLED.addLeds<CHIPSET, LED_PIN8, COLOR_ORDER>(leds[7], NUM_LEDS); //*/
+
   FastLED.setBrightness( BRIGHTNESS );
   
-  leds1[0] = CRGB::Blue;
+  leds[0][0] = CRGB::Blue;
   FastLED.show();
   delay(500);
 
-  leds1[0] = CRGB::Green;
+  leds[0][0] = CRGB::Green;
   FastLED.show();
   delay(500);
 
-  for(uint8_t i=0;i<8;i++){
-    leds1[i] = CRGB(0,255,0);
-    leds2[i] = CRGB(0,255,0);
+  for(uint8_t i=0;i<NUM_BARS;i++){
+    for(uint8_t j=0;j<NUM_BARS;j++){
+      leds[j][i] = CRGB(0,255,0);
+    }
     FastLED.show();
   }
-  for(uint8_t i=0;i<8;i++){
-    leds1[i] = CRGB(0,0,0);
-    leds2[i] = CRGB(0,0,0);
+  for(uint8_t i=0;i<NUM_BARS;i++){
+    for(uint8_t j=0;j<NUM_BARS;j++){
+      leds[j][i] = CRGB(0,0,0);
+    }
     FastLED.show();
   }
 
@@ -170,7 +189,7 @@ void setup() {
 
   //allBlack();  
 
-  leds1[address-1] = CRGB(0,255,0);
+  leds[0][address-1] = CRGB(0,255,0);
   FastLED.show();
   delay(2000);
 
@@ -182,56 +201,44 @@ void loop() {
   
   //setBlack
   for(uint8_t i=0;i<stripLength;i++){
-    leds1[i] = CRGB(0,0,0);
-    leds2[i] = CRGB(0,0,0);
+    for(uint8_t j=0;j<NUM_BARS;j++){
+      leds[j][i] = CRGB(0,0,0);
+    }
   }
 
   if (lastPacket < 5000) {
-
-    uint8_t r, g, b;
     
-    //read RGB
-    r = DMXSerial.read(0+address);
-    g = DMXSerial.read(1+address);
-    b = DMXSerial.read(2+address);//*/
+    for (uint8_t x = 0; x < NUM_BARS; x++){
     
-    // strip1
-    uint8_t P = DMXSerial.read(3+address); 
-    uint8_t V = DMXSerial.read(4+address);    
+      uint8_t r, g, b;
+      //read RGB
+      r = DMXSerial.read(0+address+5*x);
+      g = DMXSerial.read(1+address+5*x);
+      b = DMXSerial.read(2+address+5*x);//*/
+      
+      uint8_t P = DMXSerial.read(3+address+5*x); //Position
+      uint8_t V = DMXSerial.read(4+address+5*x); //Value
 
-    P = map(P,0,255,0,stripLength);
-    V = map(V,0,255,0,stripLength);    
+      P = map(P,0,255,0,stripLength);
+      V = map(V,0,255,0,stripLength);    
 
-    uint8_t minPixel = constrain((P-V), 0, stripLength);
-    uint8_t maxPixel = constrain((P+V), 0, stripLength);
+      uint8_t minPixel = constrain((P-V), 0, stripLength);
+      uint8_t maxPixel = constrain((P+V), 0, stripLength);
 
-    for(uint8_t i = minPixel; i < maxPixel; i++){        
-      leds1[i] = CRGB(r,g,b);      
+      for(uint8_t i = minPixel; i < maxPixel; i++){        
+        leds[x][i] = CRGB(r,g,b);      
+      }
     }
-    
-    //Strip2
-    P = DMXSerial.read(5+address);
-    V = DMXSerial.read(6+address);
-
-    P = map(P,0,255,0,stripLength);
-    V = map(V,0,255,0,stripLength);    
-
-    minPixel = constrain((P-V), 0, stripLength);
-    maxPixel = constrain((P+V), 0, stripLength);
-
-    for(uint8_t i = minPixel; i < maxPixel; i++){        
-      leds2[i] = CRGB(r,g,b);
-    }
-    
   }else{
   
     //DMX signal Lost indikator
-    leds1[stripLength-1] = CRGB(0,0,255);
+    for(uint8_t j=0;j<NUM_BARS;j++){
+      leds[j][stripLength-1] = CRGB(0,0,255);
+    }
     singleRed();
 
   }
 
   FastLED.show();
 
-  delay(35);
 }

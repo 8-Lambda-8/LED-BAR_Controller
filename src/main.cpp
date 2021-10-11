@@ -11,31 +11,31 @@
 
 #ifdef COMMON_ANODE
 
-  void singleRed() {
+  void ledRed() {
     digitalWrite(LED_R, LOW);
     digitalWrite(LED_G, HIGH);
     digitalWrite(LED_B, HIGH);
   }
 
-  void singleGreen() {
+  void ledGreen() {
     digitalWrite(LED_R, HIGH);
     digitalWrite(LED_G, LOW);
     digitalWrite(LED_B, HIGH);
   }
 
-  void singleBlue() {
+  void ledBlue() {
     digitalWrite(LED_R, HIGH);
     digitalWrite(LED_G, HIGH);
     digitalWrite(LED_B, LOW);
   }
 
-  void singleYellow() {
+  void ledYellow() {
     digitalWrite(LED_R, LOW);
     digitalWrite(LED_G, LOW);
     digitalWrite(LED_B, HIGH);
   }
 
-  void allBlack() {
+  void ledOff() {
     digitalWrite(LED_R, HIGH);
     digitalWrite(LED_G, HIGH);
     digitalWrite(LED_B, HIGH);
@@ -43,31 +43,31 @@
 
 #else
 
-  void singleRed() {
+  void ledRed() {
     digitalWrite(LED_R, HIGH);
     digitalWrite(LED_G, LOW);
     digitalWrite(LED_B, LOW);
   }
 
-  void singleGreen() {
+  void ledGreen() {
     digitalWrite(LED_R, LOW);
     digitalWrite(LED_G, HIGH);
     digitalWrite(LED_B, LOW);
   }
 
-  void singleBlue() {
+  void ledBlue() {
     digitalWrite(LED_R, LOW);
     digitalWrite(LED_G, LOW);
     digitalWrite(LED_B, HIGH);
   }
 
-  void singleYellow() {
+  void ledYellow() {
     digitalWrite(LED_R, HIGH);
     digitalWrite(LED_G, HIGH);
     digitalWrite(LED_B, LOW);
   }
 
-  void allBlack() {
+  void ledOff() {
     digitalWrite(LED_R, LOW);
     digitalWrite(LED_G, LOW);
     digitalWrite(LED_B, LOW);
@@ -136,7 +136,16 @@ void setup() {
   pinMode(LED_G, OUTPUT);
   pinMode(LED_B, OUTPUT);
   
-  allBlack();
+  ledOff();
+  delay(100);
+  ledRed();
+  delay(100);
+  ledGreen();
+  delay(100);
+  ledBlue();
+  delay(100);
+  ledOff();
+  delay(500);
 
   singleRed();
   delay(2000);
@@ -184,10 +193,9 @@ void setup() {
 
   updateAddress();  
 
-  singleGreen();
+  ledGreen();
   delay(200);
-
-  //allBlack();  
+  ledOff();
 
   leds[0][address-1] = CRGB(0,255,0);
   FastLED.show();
@@ -207,6 +215,7 @@ void loop() {
   }
 
   if (lastPacket < 5000) {
+    ledGreen();
     
     for (uint8_t x = 0; x < NUM_BARS; x++){
     
@@ -235,7 +244,7 @@ void loop() {
     for(uint8_t j=0;j<NUM_BARS;j++){
       leds[j][stripLength-1] = CRGB(0,0,255);
     }
-    singleRed();
+    ledRed();
 
   }
 

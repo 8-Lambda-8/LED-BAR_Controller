@@ -82,12 +82,13 @@ void ledOff() {
 #define COLOR_ORDER GRB
 #define CHIPSET WS2812
 
-#define BRIGHTNESS 20  // 0
+#define BRIGHTNESS 255  // 0
 
 static uint16_t address = 0;
 
 #define NUM_LEDS 60
 #define NUM_BARS 4
+#define CHANNEL_COUNT 6
 
 CRGB leds[NUM_BARS][NUM_LEDS];
 
@@ -190,12 +191,13 @@ void loop() {
     for (uint8_t x = 0; x < NUM_BARS; x++) {
       CRGB col;
       // read RGB
+      uint8_t masterDimer = DMXSerial.read(5 + address + CHANNEL_COUNT * x);
 
-      col.r = DMXSerial.read(0 + address + 5 * x);
-      col.g = DMXSerial.read(1 + address + 5 * x);
-      col.b = DMXSerial.read(2 + address + 5 * x);
-      uint8_t P = DMXSerial.read(3 + address + 5 * x);  // Position
-      uint8_t V = DMXSerial.read(4 + address + 5 * x);  // Value
+      col.r = DMXSerial.read(0 + address + CHANNEL_COUNT * x) * masterDimer / 255;
+      col.g = DMXSerial.read(1 + address + CHANNEL_COUNT * x) * masterDimer / 255;
+      col.b = DMXSerial.read(2 + address + CHANNEL_COUNT * x) * masterDimer / 255;
+      uint8_t P = DMXSerial.read(3 + address + CHANNEL_COUNT * x);  // Position
+      uint8_t V = DMXSerial.read(4 + address + CHANNEL_COUNT * x);  // Value
 
       P = map(P, 0, 255, 0, NUM_LEDS);
       V = map(V, 0, 255, 0, NUM_LEDS);
